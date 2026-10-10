@@ -1,0 +1,6 @@
+{
+  "name": "Wanderly — Discover Beyond the Ordinary",
+  "description": "Curated luxury travel editorial and bespoke expeditions. Discover beyond the ordinary with tailor-made journeys to Bali, Switzerland, Kyoto, Santorini, and beyond.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
