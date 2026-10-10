@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Destination } from '../types/travel';
 import { ArrowUpRight, Heart, Star, Sparkles, MapPin } from 'lucide-react';
-import { motion, LayoutGroup, useScroll, useTransform } from 'motion/react';
+import { motion, LayoutGroup, useScroll, useTransform, useMotionValue, useSpring } from 'motion/react';
 
 interface DestinationsSectionProps {
   destinations: Destination[];
@@ -40,19 +40,86 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
   const parallaxSpeed = idx % 2 === 0 ? ['-8%', '8%'] : ['-12%', '12%'];
   const imageTranslateY = useTransform(scrollYProgress, [0, 1], parallaxSpeed);
 
+  // Magnetic cursor tracking motion values
+  const rawX = useMotionValue(0);
+  const rawY = useMotionValue(0);
+  const rawRotateX = useMotionValue(0);
+  const rawRotateY = useMotionValue(0);
+
+  // Calibrated spring physics for anchored yet organic responsiveness
+  const springConfig = { stiffness: 220, damping: 24, mass: 0.6 };
+  const magneticX = useSpring(rawX, springConfig);
+  const magneticY = useSpring(rawY, springConfig);
+  const tiltX = useSpring(rawRotateX, springConfig);
+  const tiltY = useSpring(rawRotateY, springConfig);
+
+  // Cursor position tracking for subtle dynamic sheen
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const relativeX = e.clientX - rect.left;
+    const relativeY = e.clientY - rect.top;
+
+    setCursorPos({ x: relativeX, y: relativeY });
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const deltaX = relativeX - centerX;
+    const deltaY = relativeY - centerY;
+
+    // Subtle magnetic displacement (subtle ~7px pull)
+    rawX.set(deltaX * 0.038);
+    rawY.set(deltaY * 0.038);
+
+    // Subtle physical 3D tilt (max ~2.4 degrees)
+    rawRotateX.set(-deltaY * 0.012);
+    rawRotateY.set(deltaX * 0.012);
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    rawX.set(0);
+    rawY.set(0);
+    rawRotateX.set(0);
+    rawRotateY.set(0);
+  };
+
   return (
     <motion.div
       ref={cardRef}
       id={`dest-card-${dest.id}`}
+      data-cursor="card"
+      data-cursor-label="EXPLORE"
       onClick={() => onSelectDestination(dest)}
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      initial={{ opacity: 0, y: 40, scale: 0.97 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: '-50px' }}
-      transition={{ duration: 0.8, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-      className={`group cursor-pointer relative rounded-3xl overflow-hidden border border-[#E8E1D3] shadow-card-hover flex flex-col justify-between transition-all duration-500 ${asymmetricalClass}`}
+      transition={{
+        duration: 0.9,
+        delay: idx * 0.12,
+        ease: [0.16, 1, 0.3, 1], // Smooth physical entrance
+      }}
+      style={{
+        x: magneticX,
+        y: magneticY,
+        rotateX: tiltX,
+        rotateY: tiltY,
+        transformPerspective: 1200,
+      }}
+      className={`group cursor-pointer relative rounded-3xl overflow-hidden border border-[#E8E1D3] shadow-card-hover flex flex-col justify-between transition-shadow duration-500 will-change-transform ${asymmetricalClass}`}
     >
       {/* Background Image Container with 120% height and GPU translateY Parallax */}
-      <div className="absolute inset-0 z-0 overflow-hidden bg-[#ECE6DA]">
+      <div className="absolute inset-0 z-0 overflow-hidden bg-[#ECE6DA] pointer-events-none">
         <motion.div
           style={{ y: imageTranslateY }}
           className="absolute -top-[10%] inset-x-0 h-[120%] w-full will-change-transform"
@@ -61,15 +128,25 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
             layoutId={`dest-img-${dest.id}`}
             src={dest.imageUrl}
             alt={`${dest.name}, ${dest.country}`}
-            className="w-full h-full object-cover object-center transition-transform duration-1000 ease-out group-hover:scale-108 group-hover:rotate-0.5"
+            className="w-full h-full object-cover object-center transition-transform duration-1000 ease-out group-hover:scale-106"
             referrerPolicy="no-referrer"
           />
         </motion.div>
 
         {/* Gradient Scrims for Legibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A1A12]/92 via-black/35 to-black/20 opacity-80 group-hover:opacity-75 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A1A12]/92 via-black/35 to-black/20 opacity-85 group-hover:opacity-80 transition-opacity duration-500" />
         <div className="absolute inset-0 bg-radial from-transparent to-black/50 pointer-events-none" />
       </div>
+
+      {/* Dynamic Cursor Specular Sheen (Subtle light reflection following the mouse) */}
+      {isHovered && (
+        <div
+          className="absolute inset-0 z-20 pointer-events-none transition-opacity duration-300"
+          style={{
+            background: `radial-gradient(550px circle at ${cursorPos.x}px ${cursorPos.y}px, rgba(255,255,255,0.09), transparent 60%)`,
+          }}
+        />
+      )}
 
       {/* Top Overlay Bar */}
       <div className="relative z-10 p-6 sm:p-8 flex items-center justify-between text-white">

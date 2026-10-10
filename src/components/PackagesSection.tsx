@@ -109,11 +109,15 @@ export const PackagesSection: React.FC<PackagesSectionProps> = ({
             return (
               <motion.div
                 key={pkg.id}
+                id={`pkg-card-${pkg.id}`}
+                data-cursor="card"
+                data-cursor-label="JOURNEY"
+                onClick={() => onSelectPackage(pkg)}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="group bg-white/5 hover:bg-white/[0.08] p-4 rounded-3xl overflow-hidden border border-white/10 hover:border-amber-200/40 transition-all duration-500 flex flex-col md:flex-row transform hover:-translate-y-1.5 backdrop-blur-md shadow-2xl"
+                className="group cursor-pointer bg-white/5 hover:bg-white/[0.08] p-4 rounded-3xl overflow-hidden border border-white/10 hover:border-amber-200/40 transition-all duration-500 flex flex-col md:flex-row transform hover:-translate-y-1.5 backdrop-blur-md shadow-2xl"
               >
                 {/* Package Image Column */}
                 <div className="md:w-5/12 relative aspect-4/3 md:aspect-auto overflow-hidden rounded-2xl bg-[#0F261B]">

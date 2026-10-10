@@ -4,6 +4,7 @@ import { Hero } from './components/Hero';
 import { DestinationsSection } from './components/DestinationsSection';
 import { ExperiencesSection } from './components/ExperiencesSection';
 import { WhyChooseUsSection } from './components/WhyChooseUsSection';
+import { ExpeditionTimelineSection } from './components/ExpeditionTimelineSection';
 import { PackagesSection } from './components/PackagesSection';
 import { TestimonialsSection } from './components/TestimonialsSection';
 import { CtaBanner } from './components/CtaBanner';
@@ -13,6 +14,8 @@ import { PackageModal } from './components/PackageModal';
 import { TripPlannerModal } from './components/TripPlannerModal';
 import { WishlistDrawer } from './components/WishlistDrawer';
 import { MorphTransitionOverlay } from './components/MorphTransitionOverlay';
+import { ScrollProgressBar } from './components/ScrollProgressBar';
+import { CustomCursor } from './components/CustomCursor';
 
 import { FEATURED_DESTINATIONS, POPULAR_PACKAGES } from './data/travelData';
 import { Destination, TravelPackage, SearchQuery } from './types/travel';
@@ -92,6 +95,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#1E2621] selection:bg-[#B85D43]/20 selection:text-[#142E23] flex flex-col font-sans">
+      {/* Custom Non-Intrusive Magnetic Cursor */}
+      <CustomCursor />
+
+      {/* Editorial Scroll Progress Indicator (Framer Motion) */}
+      <ScrollProgressBar />
+
       {/* 1. Navbar */}
       <Navbar
         onOpenTripPlanner={() => {
@@ -144,6 +153,14 @@ export default function App() {
 
         {/* 5. Why Choose Us */}
         <WhyChooseUsSection />
+
+        {/* 5.5 Bespoke Expedition Timeline */}
+        <ExpeditionTimelineSection
+          onOpenTripPlanner={() => {
+            setPlannerDestinationPreload('');
+            setIsTripPlannerOpen(true);
+          }}
+        />
 
         {/* 6. Popular Packages */}
         <PackagesSection

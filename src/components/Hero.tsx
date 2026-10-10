@@ -133,6 +133,8 @@ export const Hero: React.FC<HeroProps> = ({
                   onExploreDestinations(featuredDest.id);
                 }
               }}
+              data-cursor="card"
+              data-cursor-label="PREVIEW"
               className="group/card cursor-pointer bg-white/12 hover:bg-white/18 backdrop-blur-xl border border-white/25 rounded-2xl p-4 shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:border-[#C5A059]/50"
             >
               <div className="relative aspect-16/10 rounded-xl overflow-hidden mb-3">
